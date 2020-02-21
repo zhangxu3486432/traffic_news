@@ -41,6 +41,7 @@ services:
     command: scrapy crawl cpd
     volumes:
       - ../log/:/project/log/
+      - ../error/:/project/error/
     networks:
       - crawler
 
