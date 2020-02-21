@@ -109,7 +109,7 @@ class CpdItem(Item):
         input_processor=MapCompose(clean),
         output_processor=TakeFirst(),
     )
-    date = Field(
+    publish_date = Field(
         input_processor=MapCompose(clean),
         output_processor=TakeFirst(),
     )

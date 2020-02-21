@@ -27,7 +27,7 @@ class SavePipeline(object):
 
     def process_item(self, item, spider):
         sql_news = """INSERT INTO
-        news.cpd_news (news_id, title, category, source, date, page_total)
+        news.cpd_news (news_id, title, category, source, publish_date, page_total)
         VALUES (%s,%s,%s,%s,%s,%s)
         """
         sql_content = """INSERT INTO
@@ -40,7 +40,7 @@ class SavePipeline(object):
         content = item.get('content', '')
         category = item.get('category', '')
         source = item.get('source', '')
-        date = item.get('date', '')
+        date = item.get('publish_date', '')
         news_id = item.get('news_id', '')
         page = item.get('page', 0)
         total_page = item.get('total_page', 0)

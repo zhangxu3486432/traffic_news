@@ -166,7 +166,7 @@ class CpdSpider(scrapy.Spider):
             cpd_item.add_xpath('content', '//*[@id="fz_test"]/div[1]/table')
             cpd_item.add_value('category', url)
             cpd_item.add_xpath('source', '//*[@id="source_report"]/text()')
-            cpd_item.add_xpath('date', '//*[@id="pub_time_report"]/text()')
+            cpd_item.add_xpath('publish_date', '//*[@id="pub_time_report"]/text()')
             cpd_item.add_value('news_id', url)
             cpd_item.add_value('page', current_page)
             cpd_item.add_value('total_page', total_page)
