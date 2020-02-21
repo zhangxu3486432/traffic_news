@@ -108,13 +108,13 @@ REDIRECT_ENABLED = False
 
 # 数据库设置
 dev = os.getenv('ScrapyDev', False)
-if not dev:
-    MYSQL_HOST = '39.99.157.187'
+if dev:
+    MYSQL_HOST = 'localhost'
     MYSQL_USER = 'root'
     MYSQL_PASSWORD = 'news_crawler'
     MYSQL_PORT = 3306
 else:
-    MYSQL_HOST = 'localhost'
+    MYSQL_HOST = 'db'
     MYSQL_USER = 'root'
     MYSQL_PASSWORD = 'news_crawler'
     MYSQL_PORT = 3306

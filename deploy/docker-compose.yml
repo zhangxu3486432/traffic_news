@@ -16,7 +16,7 @@ services:
       - ../data/mysql/db:/var/lib/mysql
       - ./init/cpd.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
-      - crawler_db
+      - crawler
 
   gui:
     depends_on:
@@ -30,7 +30,19 @@ services:
     ports:
       - '8000:80'
     networks:
-      - crawler_db
+      - crawler
+
+  crawler:
+    depends_on:
+      - db
+      - gui
+    image: registry.cn-hangzhou.aliyuncs.com/traffic_news/cpd_crawler:latest
+    container_name: crawler
+    command: scrapy crawl cpd
+    volumes:
+      - ../log/:/project/log/
+    networks:
+      - crawler
 
 networks:
-  crawler_db:
+  crawler:
