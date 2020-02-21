@@ -87,7 +87,7 @@ def get_category(url):
 
 
 class CpdItem(Item):
-    id = Field(
+    request_id = Field(
         output_processor=TakeFirst(),
     )
     url = Field(
@@ -118,5 +118,8 @@ class CpdItem(Item):
         output_processor=TakeFirst(),
     )
     page = Field(
+        output_processor=TakeFirst(),
+    )
+    total_page = Field(
         output_processor=TakeFirst(),
     )

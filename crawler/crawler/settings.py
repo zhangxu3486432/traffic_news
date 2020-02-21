@@ -8,6 +8,7 @@
 #     https://docs.scrapy.org/en/latest/topics/settings.html
 #     https://docs.scrapy.org/en/latest/topics/downloader-middleware.html
 #     https://docs.scrapy.org/en/latest/topics/spider-middleware.html
+import os
 
 BOT_NAME = 'crawler'
 
@@ -53,6 +54,7 @@ COOKIES_ENABLED = False
 # Enable or disable spider middlewares
 # See https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 SPIDER_MIDDLEWARES = {
+    'crawler.middlewares.SaveHttpErrorMiddleware': 49,
     'crawler.middlewares.CrawlerSpiderMiddleware': 543,
 }
 
@@ -95,8 +97,6 @@ ITEM_PIPELINES = {
 # HTTPCACHE_IGNORE_HTTP_CODES = []
 # HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
-DEPTH_LIMIT = 10
-
 LOG_LEVEL = 'DEBUG'
 LOG_STDOUT = True
 
@@ -104,11 +104,20 @@ DUPEFILTER_CLASS = 'crawler.dupefilters.RFPDupeFilter'
 
 RETRY_HTTP_CODES = [500, 502, 503, 504, 522, 524, 408, 429, 405]
 
+REDIRECT_ENABLED = False
+
 # 数据库设置
-MYSQL_HOST = '39.99.157.187'
-MYSQL_USER = 'root'
-MYSQL_PASSWORD = 'news_crawler'
-MYSQL_PORT = 3306
+dev = os.getenv('ScrapyDev', False)
+if not dev:
+    MYSQL_HOST = '39.99.157.187'
+    MYSQL_USER = 'root'
+    MYSQL_PASSWORD = 'news_crawler'
+    MYSQL_PORT = 3306
+else:
+    MYSQL_HOST = 'localhost'
+    MYSQL_USER = 'root'
+    MYSQL_PASSWORD = 'news_crawler'
+    MYSQL_PORT = 3306
 
 USER_AGENT_LIST = [
     'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_8; en-us) AppleWebKit/534.50 (KHTML, like Gecko) Version/5.1 Safari/534.50',

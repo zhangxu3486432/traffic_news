@@ -8,6 +8,7 @@
 
 
 import logging
+import os
 import re
 from datetime import datetime
 
@@ -35,8 +36,8 @@ class CpdSpider(scrapy.Spider):
     }
 
     database_name = 'news'
-    table_name = 'cpd_news'
-    filter_name = 'id'
+    table_name = 'cpd_news_content'
+    filter_name = 'request_id'
 
     allowed_domains = ["cpd.com.cn"]
 
@@ -101,6 +102,17 @@ class CpdSpider(scrapy.Spider):
     p_path2 = re.compile('(.*?)content.html')
 
     def start_requests(self):
+        try:
+            path = f'error/{self.name}'
+            retry_file = os.path.join(path, 'retry.tsv')
+            with open(retry_file, 'r') as f:
+                lines = f.readlines()
+                for line in lines:
+                    news_url = line.split('\t')[0]
+                    yield scrapy.Request(url=news_url, callback=self.parse_news)
+        except IOError:
+            logger.info('retry.tsv not accessible')
+
         for url in self.start_urls:
             yield scrapy.Request(url=url, callback=self.parse_index, dont_filter=True)
 
@@ -121,11 +133,13 @@ class CpdSpider(scrapy.Spider):
         if title is not None:
             next_page_html = response.xpath('//*[@id="autopage"]//script').get()
 
-            page = response.meta.get('page', 1)
+            current_page = response.meta.get('page', 1)
+            total_page = 1
 
             next_page1 = self.p_news1.findall(next_page_html)  # [(总页数 0，当前页数 0)] 从 0 计数
             next_page2 = self.p_news2.findall(next_page_html)  # [(总页数 1，当前页数 1)] 从 1 计数
             if len(next_page1) == 1 and next_page1[0][0] != '0' and next_page1[0][1] == '0':
+                total_page = int(next_page1[0][0])
                 url_arr = self.p_path1.findall(url)
                 if len(url_arr) == 1:
                     for page in range(1, int(next_page1[0][0])):
@@ -134,9 +148,10 @@ class CpdSpider(scrapy.Spider):
                 else:
                     self.logger.error(f'未知格式的 NEWS URL: {url}')
             elif len(next_page2) == 1 and next_page2[0][0] != '1' and next_page2[0][1] == '1':
+                total_page = int(next_page2[0][0])
                 url_arr = self.p_path2.findall(url)
                 if len(url_arr) == 1:
-                    for page in range(2, int(next_page2[0][0] + 1)):
+                    for page in range(2, int(next_page2[0][0]) + 1):
                         yield scrapy.Request(url=f'{url_arr[0]}content_{page}.html', callback=self.parse_news,
                                              meta={'page': page})
                 else:
@@ -145,7 +160,7 @@ class CpdSpider(scrapy.Spider):
             fp = request_fingerprint(response.request)
 
             cpd_item = ItemLoader(item=CpdItem(), response=response)
-            cpd_item.add_value('id', fp)
+            cpd_item.add_value('request_id', fp)
             cpd_item.add_value('url', url)
             cpd_item.add_xpath('title', '//*[@id="newslist"]/h1/gettitle/text()')
             cpd_item.add_xpath('content', '//*[@id="fz_test"]/div[1]/table')
@@ -153,7 +168,8 @@ class CpdSpider(scrapy.Spider):
             cpd_item.add_xpath('source', '//*[@id="source_report"]/text()')
             cpd_item.add_xpath('date', '//*[@id="pub_time_report"]/text()')
             cpd_item.add_value('news_id', url)
-            cpd_item.add_value('page', page)
+            cpd_item.add_value('page', current_page)
+            cpd_item.add_value('total_page', total_page)
             yield cpd_item.load_item()
 
         links = self.link.extract_links(response)

@@ -9,6 +9,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: news_crawler
+      TZ: "Asia/Shanghai"
     ports:
       - '3306:3306'
     volumes:
